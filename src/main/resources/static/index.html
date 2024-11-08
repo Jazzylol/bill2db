@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>文件上传</title>
+    <style>
+        .upload-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .upload-btn, .select-btn, .clear-btn, .clear-all-btn {
+            margin-top: 10px;
+            padding: 8px 15px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            outline: none;
+        }
+        .upload-btn, .select-btn {
+            background-color: #4CAF50;
+        }
+        .clear-btn, .clear-all-btn {
+            background-color: #ff9800;
+        }
+        .clear-all-btn {
+            background-color: #f44336;
+        }
+        .upload-btn:hover, .select-btn:hover {
+            background-color: #45a049;
+        }
+        .clear-btn:hover {
+            background-color: #f57c00;
+        }
+        .clear-all-btn:hover {
+            background-color: #d32f2f;
+        }
+        #fileList {
+            margin-top: 10px;
+        }
+        .file-item {
+            margin: 5px 0;
+            padding: 5px;
+            border: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete-btn {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 8px;
+            cursor: pointer;
+            outline: none;
+        }
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+        #files {
+            display: none;
+        }
+        #message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .message-success {
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+        }
+        .message-error {
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            color: #a94442;
+        }
+        .message-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+        .loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            border: 3px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: loading-spinner 1s ease infinite;
+        }
+        @keyframes loading-spinner {
+            from {
+                transform: rotate(0turn);
+            }
+            to {
+                transform: rotate(1turn);
+            }
+        }
+        .button-content {
+            visibility: visible;
+        }
+        .loading .button-content {
+            visibility: hidden;
+        }
+        button:focus {
+            outline: none;
+        }
+        form {
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            margin: 0 0 20px 0;
+            padding: 0;
+            color: #333;
+            font-weight: normal;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h2>账单上传</h2>
+        <form id="uploadForm">
+            <input type="file" id="files" name="files" multiple>
+            <div class="button-group">
+                <button type="button" class="select-btn" onclick="document.getElementById('files').click()">选择文件</button>
+                <button type="submit" id="uploadBtn" class="upload-btn">
+                    <span class="button-content">上传</span>
+                </button>
+                <button type="button" class="clear-all-btn" onclick="clearAll()">清空全部</button>
+            </div>
+        </form>
+        <div id="fileList"></div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        let selectedFiles = new Map(); // 使用Map存储已选择的文件
+        const fileInput = document.getElementById('files');
+        const fileList = document.getElementById('fileList');
+        const messageDiv = document.getElementById('message');
+        const uploadBtn = document.getElementById('uploadBtn');
+        
+        function updateFileList() {
+            fileList.innerHTML = '';
+            selectedFiles.forEach((file, id) => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `
+                    <span>${file.name} (${(file.size / 1024).toFixed(2)} KB)</span>
+                    <button type="button" class="delete-btn" onclick="removeFile('${id}')">删除</button>
+                `;
+                fileList.appendChild(div);
+            });
+        }
+
+        function removeFile(id) {
+            selectedFiles.delete(id);
+            updateFileList();
+        }
+
+        function clearAll() {
+            selectedFiles.clear();
+            updateFileList();
+            clearMessage();
+        }
+
+        function clearMessage() {
+            messageDiv.innerHTML = '';
+            messageDiv.className = '';
+        }
+
+        function showMessage(message, isError = false) {
+            messageDiv.innerHTML = `
+                <div class="message-container">
+                    <span>${message}</span>
+                    <button type="button" class="delete-btn" onclick="clearMessage()">×</button>
+                </div>
+            `;
+            messageDiv.className = isError ? 'message-error' : 'message-success';
+        }
+
+        fileInput.addEventListener('change', function() {
+            Array.from(this.files).forEach(file => {
+                const id = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                selectedFiles.set(id, file);
+            });
+            this.value = ''; // 清空input，允许重复选择相同文件
+            updateFileList();
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (selectedFiles.size === 0) {
+                showMessage('请先选择文件', true);
+                return;
+            }
+
+            // 添加loading状态
+            uploadBtn.classList.add('loading');
+
+            const formData = new FormData();
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+
+            fetch('/bill/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                showMessage(data.message);
+                // 上传成功后清空文件列表
+                selectedFiles.clear();
+                updateFileList();
+            })
+            .catch(error => {
+                showMessage(error.toString(), true);
+            })
+            .finally(() => {
+                // 移除loading状态
+                uploadBtn.classList.remove('loading');
+            });
+        });
+    </script>
+</body>
+</html> 
