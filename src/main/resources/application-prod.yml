@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:/app/bill.db
+    username:
+    password:
