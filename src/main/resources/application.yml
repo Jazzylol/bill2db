@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: bill2db
+  main:
+    allow-circular-references: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+
+  flyway:
+    enabled: true
+    clean-disabled: true
+
+
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
