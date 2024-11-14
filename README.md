@@ -11,21 +11,21 @@ bill2db 是一个简单易用的账单数据管理工具，可以将支付宝和
 - 支持SQLite和MySQL两种数据库
 - 简洁的Web界面，操作便捷
 - Docker支持，易于部署
+- 数据默认存储本地无需联网
 
 ## 快速开始
 
 ### 方式一：直接运行
 
-1. 确保已安装Java 17或更高版本
-2. 下载最新的release包
+1. 确保已安装Java环境、Maven环境
+2. 在项目根目录下 mvn clean package
 3. 运行应用：
    ```bash
-   java -jar bill2db.jar
+   java -jar ./target/bill2db.jar
    ```
 4. 访问 http://localhost:8080 即可使用
    - 支持批量上传账单CSV文件
    - 支持添加自定义标签
-   - 支持清空已选文件列表
    - 支持清空数据库
    - 支持导出账单数据为SQL文件
 
@@ -33,12 +33,12 @@ bill2db 是一个简单易用的账单数据管理工具，可以将支付宝和
 
 1. 拉取镜像：
    ```bash
-   docker pull ghcr.io/javahuang/bill2db:latest
+   docker pull jazzylol/bill2db:latest
    ```
 
 2. 运行容器：
    ```bash
-   docker run -d -p 8080:8080 ghcr.io/javahuang/bill2db:latest
+   docker run -d -p 8080:8080 jazzylol/bill2db:latest
    ```
 
 3. 访问 http://localhost:8080 即可使用
@@ -52,7 +52,7 @@ bill2db 是一个简单易用的账单数据管理工具，可以将支付宝和
    version: '3'
    services:
      bill2db:
-       image: ghcr.io/javahuang/bill2db:latest
+       image: jazzylol/bill2db:latest
        ports:
          - "8080:8080"
        restart: unless-stopped
@@ -68,14 +68,13 @@ bill2db 是一个简单易用的账单数据管理工具，可以将支付宝和
 ## 数据库配置
 
 ### SQLite (默认)
-无需配置，默认使用当前目录下的 bill.db 文件
+无需配置，默认文件路径/app/bill.db
 
 ### MySQL
 通过环境变量配置:
-- SPRING_DATASOURCE_URL=jdbc:mysql://host:3306/bill
+- SPRING_DATASOURCE_URL=jdbc:mysql://host:port/bill
 - SPRING_DATASOURCE_USERNAME=your_username
 - SPRING_DATASOURCE_PASSWORD=your_password
-- SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
 
 ## 注意事项
 
