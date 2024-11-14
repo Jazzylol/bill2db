@@ -24,12 +24,18 @@ public class FlywayConfig implements ApplicationRunner {
 
     @Bean
     @DependsOn("dataSource")
-    public Flyway flywayForMySQL() {
+    public Flyway flywayForMySQL() throws Exception{
         if (StringUtils.contains(dataSourceProperties.getUrl(), "mysql")) {
             return Flyway.configure()
                     .driver(StringUtils.isNotBlank(dataSourceProperties.getDriverClassName()) ? dataSourceProperties.getDriverClassName() : "com.mysql.cj.jdbc.Driver")
                     .dataSource(dataSourceProperties.getUrl(), dataSourceProperties.getUsername(), dataSourceProperties.getPassword())
                     .locations("classpath:db/mysql")
+                    .load();
+        } else if (StringUtils.contains(dataSourceProperties.getUrl(), "sqlite")) {
+            return Flyway.configure()
+                    .driver(StringUtils.isNotBlank(dataSourceProperties.getDriverClassName()) ? dataSourceProperties.getDriverClassName() : "org.sqlite.JDBC")
+                    .dataSource(dataSourceProperties.getUrl(), "", "")
+                    .locations("classpath:db/sqlite")
                     .load();
         } else {
             return Flyway.configure()

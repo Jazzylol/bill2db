@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: prod
   application:
     name: bill2db
   main:
@@ -7,16 +9,18 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
-
-
   flyway:
     enabled: true
     clean-disabled: true
 
 
 server:
-  servlet:
-    encoding:
-      charset: UTF-8
-      force: true
-      enabled: true
+  port: 8080
+  shutdown: graceful
+  encoding:
+    charset: UTF-8
+    force: true
+    enabled: true
+  undertow:
+    buffer-size: 1024
+    direct-buffers: true

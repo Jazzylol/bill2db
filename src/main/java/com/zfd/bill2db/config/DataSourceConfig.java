@@ -46,7 +46,7 @@ public class DataSourceConfig {
             dataSource.setDriverClassName(StringUtils.isNotBlank(dataSourceProperties.getDriverClassName()) ? dataSourceProperties.getDriverClassName() : "org.sqlite.JDBC");
             dataSource.setUrl(dataSourceProperties.getUrl());
         } else {
-            File file = new File("bill.db");
+            File file = new File("/app/bill.db");
             if (!file.exists()) {
                 file.createNewFile();
             }
